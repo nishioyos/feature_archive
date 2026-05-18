@@ -3,7 +3,7 @@ name: Generate JSON & Deploy
 on:
   repository_dispatch:
     types: [microcms_updated]
-workflow_dispatch:  # ← 手動実行用に追加
+  workflow_dispatch:  # ← 手動実行用に追加
 jobs:
   deploy:
     runs-on: ubuntu-latest
