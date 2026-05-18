@@ -4,7 +4,7 @@ const fs = require("fs");
 const SERVICE_ID = process.env.MICROCMS_SERVICE_ID;
 const API_KEY = process.env.MICROCMS_API_KEY;
 
-const url = `https://${SERVICE_ID}.microcms.io/api/v1/news?limit=100`;
+const url = `https://${SERVICE_ID}.microcms.io/api/v1/feature_archive?limit=100`;
 
 https.get(url, { headers: { "X-MICROCMS-API-KEY": API_KEY } }, (res) => {
   let data = "";
