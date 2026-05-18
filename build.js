@@ -4,18 +4,30 @@ const fs = require("fs");
 const SERVICE_ID = process.env.MICROCMS_SERVICE_ID;
 const API_KEY = process.env.MICROCMS_API_KEY;
 
-const url = `https://${SERVICE_ID}.microcms.io/api/v1/archive?limit=100`;
+async function fetchAll() {
+  let contents = [];
+  let offset = 0;
+  const limit = 100;
 
-https.get(url, { headers: { "X-MICROCMS-API-KEY": API_KEY } }, (res) => {
-  let data = "";
-  res.on("data", (chunk) => data += chunk);
-  res.on("end", () => {
-    console.log("Response:", data); // ← レスポンス内容を確認
-    const json = JSON.parse(data);
-    console.log("Keys:", Object.keys(json)); // ← キーを確認
+  while (true) {
+    const url = `https://${SERVICE_ID}.microcms.io/api/v1/news?limit=${limit}&offset=${offset}`;
+    const data = await new Promise((resolve, reject) => {
+      https.get(url, { headers: { "X-MICROCMS-API-KEY": API_KEY } }, (res) => {
+        let body = "";
+        res.on("data", (chunk) => body += chunk);
+        res.on("end", () => resolve(JSON.parse(body)));
+      }).on("error", reject);
+    });
 
-    fs.mkdirSync("dist", { recursive: true });
-    fs.writeFileSync("dist/news.json", JSON.stringify(json.contents, null, 2));
-    console.log("JSON generated!");
-  });
-});
+    contents = contents.concat(data.contents);
+
+    if (contents.length >= data.totalCount) break;
+    offset += limit;
+  }
+
+  fs.mkdirSync("dist", { recursive: true });
+  fs.writeFileSync("dist/news.json", JSON.stringify(contents, null, 2));
+  console.log(`JSON generated! ${contents.length}件`);
+}
+
+fetchAll();
